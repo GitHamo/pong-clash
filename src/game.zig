@@ -37,7 +37,7 @@ pub const Game = struct {
 
     const Self = @This();
 
-    pub fn init(width: f32, height: f32, max_score: f32, game_mode: GameMode) Self {
+    pub fn init(width: f32, height: f32, max_score: f32, game_mode: GameMode) !Self {
         var player_one_mode: GamePlayMode = undefined;
         var player_two_mode: GamePlayMode = undefined;
 
@@ -86,15 +86,21 @@ pub const Game = struct {
         const player_one = Player.init(player_one_mode, player_one_paddle);
         const player_two = Player.init(player_two_mode, player_two_paddle);
 
+        const ball = Ball.init(width / 2, height / 2, 10, BALL_SPEED, width, height) catch unreachable;
+
         return Self{
             .mode = game_mode,
             .screen_w = width,
             .screen_h = height,
-            .ball = Ball.init(width / 2, height / 2, 10, BALL_SPEED, width, height),
+            .ball = ball,
             .player_one = player_one,
             .player_two = player_two,
             .max_score = max_score,
         };
+    }
+
+    pub fn deinit(self: *Self) void {
+        self.ball.deinit();
     }
 
     pub fn update(self: *Self) void {

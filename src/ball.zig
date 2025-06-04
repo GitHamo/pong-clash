@@ -15,10 +15,15 @@ pub const Ball = struct {
     s: f32, // speed
     screen_w: f32, // screen width
     screen_h: f32, // screen height
+    fx_hit: rl.Sound,
+    fx_score: rl.Sound,
 
     const Self = @This();
 
-    pub fn init(x: f32, y: f32, r: f32, s: f32, screen_w: f32, screen_h: f32) Self {
+    pub fn init(x: f32, y: f32, r: f32, s: f32, screen_w: f32, screen_h: f32) !Self {
+        const fx_hit: rl.Sound = try rl.loadSound("resources/audio/ping.ogg");
+        const fx_score: rl.Sound = try rl.loadSound("resources/audio/boing.ogg");
+
         return Self{
             .x = x,
             .y = y,
@@ -28,7 +33,14 @@ pub const Ball = struct {
             .s = s,
             .screen_w = screen_w,
             .screen_h = screen_h,
+            .fx_hit = fx_hit,
+            .fx_score = fx_score,
         };
+    }
+
+    pub fn deinit(self: *Self) void {
+        rl.unloadSound(self.fx_hit);
+        rl.unloadSound(self.fx_score);
     }
 
     pub fn update(self: *Self, game: *Game) void {
@@ -56,6 +68,13 @@ pub const Ball = struct {
 
     fn bounceOff(self: *Self) void {
         self.vx = -self.vx;
+        rl.playSound(self.fx_hit);
+    }
+
+    fn score(self: *Self, player: *Player) void {
+        player.score += 1;
+        self.reset();
+        rl.playSound(self.fx_score);
     }
 
     fn check_collision(self: *Self, game: *Game) void {
@@ -78,9 +97,9 @@ pub const Ball = struct {
             if (collision) {
                 self.vx = -self.vx;
                 self.x = self.r; // Push ball just outside wall
+                rl.playSound(self.fx_hit);
             } else {
-                game.player_two.score += 1;
-                self.reset();
+                self.score(&game.player_two);
             }
         }
 
@@ -98,8 +117,7 @@ pub const Ball = struct {
                     self.bounceOff();
                 } else {
                     // handle right wall collision as a paddle miss (score to player 1)
-                    game.player_one.score += 1;
-                    self.reset();
+                    self.score(&game.player_one);
                 }
             } else {
                 // handle right wall collision as a wall hit (bounce off)

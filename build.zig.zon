@@ -13,8 +13,8 @@
         "build.zig",
         "build.zig.zon",
         "src",
-        // For example...
-        //"LICENSE",
+        "resources/audio",
+        "LICENSE",
         "README.md",
     },
 }

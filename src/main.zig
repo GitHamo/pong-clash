@@ -10,9 +10,16 @@ pub fn main() !void {
     rl.initWindow(initialWidth, initialHeight, "Pong!!");
     defer rl.closeWindow();
 
+    rl.initAudioDevice();
+    defer rl.closeAudioDevice();
+
     rl.setTargetFPS(60);
 
-    var game = Game.init(initialWidth, initialHeight, maxScore, .cpu_vs_cpu);
+    var game = Game.init(initialWidth, initialHeight, maxScore, .cpu_vs_cpu) catch |err| {
+        std.log.err("Failed to initialize game: {any}", .{err});
+        return err;
+    };
+    defer game.deinit();
 
     while (!rl.windowShouldClose()) {
         rl.beginDrawing();
