@@ -1,9 +1,7 @@
 .{
     .name = .ping_pong,
-
     .version = "0.0.0",
-
-    .fingerprint = 0xddd6f6efdc60d2de, // Changing this has security and trust implications.
+    .fingerprint = 0xad29a2f846e3b5f7,
     .minimum_zig_version = "0.14.1",
     .dependencies = .{
         .raylib_zig = .{
