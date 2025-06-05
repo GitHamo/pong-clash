@@ -59,7 +59,7 @@ pub const Ball = struct {
         );
     }
 
-    fn reset(self: *Self) void {
+    pub fn reset(self: *Self) void {
         self.x = self.screen_w / 2;
         self.y = self.screen_h / 2;
         self.vx = if ((self.vx > 0)) -self.s else self.s;

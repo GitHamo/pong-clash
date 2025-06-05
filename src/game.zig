@@ -122,6 +122,12 @@ pub const Game = struct {
         self.player_two.draw();
     }
 
+    pub fn reset(self: *Self) !void {
+        self.ball.reset();
+        self.player_one.score = 0;
+        self.player_two.score = 0;
+    }
+
     pub fn shouldEnd(_: *Self) bool {
         return false;
     }
