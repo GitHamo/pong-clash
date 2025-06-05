@@ -1,6 +1,8 @@
 const std = @import("std");
 const rl = @import("raylib");
 const Game = @import("game.zig").Game;
+const GameState = @import("game.zig").GameState;
+const display = @import("display.zig");
 
 pub fn main() !void {
     const initialWidth = 1280;
@@ -15,6 +17,7 @@ pub fn main() !void {
 
     rl.setTargetFPS(60);
 
+    var currentState = GameState.paused;
     var game = Game.init(initialWidth, initialHeight, maxScore, .cpu_vs_cpu) catch |err| {
         std.log.err("Failed to initialize game: {any}", .{err});
         return err;
@@ -27,7 +30,7 @@ pub fn main() !void {
 
         rl.clearBackground(.black);
 
-        game.update();
-        game.draw();
+        display.update(&currentState, &game);
+        display.draw(currentState, &game);
     }
 }
