@@ -2,15 +2,49 @@ const std = @import("std");
 const rl = @import("raylib");
 const Game = @import("game.zig").Game;
 const GameState = @import("game.zig").GameState;
+const GameMode = @import("game.zig").GameMode;
 
-pub fn update(state: *GameState, game: *Game) void {
+pub fn update(state: *GameState, game: *Game, startMusic: rl.Music) !void {
+    // music handle
     switch (state.*) {
         .start => {
-            // update
+            rl.updateMusicStream(startMusic);
+
+            if (!rl.isMusicStreamPlaying(startMusic)) {
+                rl.playMusicStream(startMusic);
+            }
+        },
+        .playing, .paused => {
+            if (rl.isMusicStreamPlaying(startMusic)) {
+                rl.stopMusicStream(startMusic);
+            }
+        },
+    }
+
+    switch (state.*) {
+        .start => {
+            const mouse = rl.getMousePosition();
+            const startButton = rl.Rectangle{
+                .x = game.screen_w / 2 - 100,
+                .y = game.screen_h / 2,
+                .width = 200,
+                .height = 50,
+            };
+            if (rl.isMouseButtonPressed(rl.MouseButton.left) and rl.checkCollisionPointRec(mouse, startButton)) {
+                try game.reset();
+                state.* = GameState.playing;
+            }
         },
         .playing => {
             if (rl.isKeyPressed(.p)) {
                 state.* = GameState.paused;
+            }
+            if (rl.isKeyPressed(.n)) {
+                try game.reset();
+            }
+            if (rl.isKeyPressed(.o)) {
+                try game.reset();
+                state.* = GameState.start;
             }
 
             game.update();
@@ -23,18 +57,28 @@ pub fn update(state: *GameState, game: *Game) void {
             if (rl.isKeyPressed(.p)) {
                 state.* = GameState.playing;
             }
+            if (rl.isKeyPressed(.n)) {
+                try game.reset();
+                state.* = GameState.playing;
+            }
+            if (rl.isKeyPressed(.o)) {
+                try game.reset();
+                state.* = GameState.start;
+            }
             // Optional: update pause menu here
         },
     }
 }
 
-pub fn draw(state: GameState, game: *Game) void {
+pub fn draw(state: GameState, game: *Game) !void {
+    rl.clearBackground(.black);
+
     const screen_width = rl.getScreenWidth();
     const screen_height = rl.getScreenHeight();
 
     switch (state) {
         .start => {
-            //
+            draw_start_screen(screen_width, screen_height);
         },
         .playing => {
             draw_game(game, screen_width, screen_height);
@@ -44,10 +88,31 @@ pub fn draw(state: GameState, game: *Game) void {
             draw_pause_screen(screen_width, screen_height);
         },
     }
-
 }
 
-fn draw_start_screen(_: i32, _: i32) void {}
+fn draw_start_screen(w: i32, h: i32) void {
+    rl.drawRectangle(0, 0, w, h, rl.Color{ .r = 178, .g = 34, .b = 34, .a = 255 });
+    // logo
+    var logo_buffer: [64:0]u8 = undefined;
+    const logo_text = std.fmt.bufPrintZ(&logo_buffer, "PONG CLASH", .{}) catch unreachable;
+    rl.drawText(logo_text, @divTrunc(w, 2) - 150, @divTrunc(h, 2) - 100, 46, .yellow);
+
+    // choose mode (cpu/one player/two players)
+    // choose difficuilty (easy/medium/hard)
+    // choose type (score/time)
+
+    const button = rl.Rectangle{
+        .x = @floatFromInt(@divTrunc(w, 2) - 100),
+        .y = @floatFromInt(@divTrunc(h, 2)),
+        .width = 200,
+        .height = 50,
+    };
+    const button_text_x: i32 = @intFromFloat(button.x + 60);
+    const button_text_y: i32 = @intFromFloat(button.y + 15);
+
+    rl.drawRectangleRec(button, .dark_gray);
+    rl.drawText("START", button_text_x, button_text_y, 20, .white);
+}
 
 fn draw_pause_screen(w: i32, h: i32) void {
     rl.drawRectangle(0, 0, w, h, rl.Color{ .r = 0, .g = 0, .b = 0, .a = 192 });
@@ -55,7 +120,7 @@ fn draw_pause_screen(w: i32, h: i32) void {
     const message = "PAUSED";
     const font_size: i32 = 80;
     const text_width = rl.measureText(message, font_size);
-    const text_x: i32 = @intFromFloat(@as(f32, @floatFromInt(w-text_width)) / 2);
+    const text_x: i32 = @intFromFloat(@as(f32, @floatFromInt(w - text_width)) / 2);
     const text_y: i32 = @intFromFloat(@as(f32, @floatFromInt(h - font_size)) / 2);
 
     rl.drawText(message, text_x, text_y, font_size, .white);
@@ -77,7 +142,7 @@ fn draw_info_bar(w: i32, h: i32, fs: i32) void {
     rl.drawRectangle(bar_x, bar_y, bar_width, bar_height, rl.Color{ .r = 191, .g = 191, .b = 191, .a = 191 });
 
     var buffer: [64:0]u8 = undefined;
-    const fps_text = std.fmt.bufPrintZ(&buffer, "FPS: {d} - [P] Pause [N] New [O] Out", .{ rl.getFPS() }) catch unreachable;
+    const fps_text = std.fmt.bufPrintZ(&buffer, "FPS: {d} - [P] Pause [N] New [O] Out", .{rl.getFPS()}) catch unreachable;
 
     rl.drawText(fps_text, @intCast(2 + padding), @intCast(bar_y + padding), fs, .black);
 }
