@@ -128,7 +128,10 @@ pub const Game = struct {
         self.player_two.reset();
     }
 
-    pub fn shouldEnd(_: *Self) bool {
+    pub fn shouldEnd(self: *Self) bool {
+        if (self.player_one.score >= self.max_score or self.player_two.score >= self.max_score) {
+            return true;
+        }
         return false;
     }
 
