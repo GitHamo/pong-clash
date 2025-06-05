@@ -5,6 +5,7 @@ const GameMode = @import("game.zig").GameMode;
 const GamePlayMode = @import("game.zig").GamePlayMode;
 const Paddle = @import("paddle.zig").Paddle;
 const Player = @import("player.zig").Player;
+const SFX = @import("audio.zig").SFX;
 
 pub const Ball = struct {
     x: f32,
@@ -20,10 +21,7 @@ pub const Ball = struct {
 
     const Self = @This();
 
-    pub fn init(x: f32, y: f32, r: f32, s: f32, screen_w: f32, screen_h: f32) !Self {
-        const fx_hit: rl.Sound = try rl.loadSound("resources/audio/ping.ogg");
-        const fx_score: rl.Sound = try rl.loadSound("resources/audio/boing.ogg");
-
+    pub fn init(x: f32, y: f32, r: f32, s: f32, screen_w: f32, screen_h: f32, sounds: SFX) !Self {
         return Self{
             .x = x,
             .y = y,
@@ -33,8 +31,8 @@ pub const Ball = struct {
             .s = s,
             .screen_w = screen_w,
             .screen_h = screen_h,
-            .fx_hit = fx_hit,
-            .fx_score = fx_score,
+            .fx_hit = sounds.hit,
+            .fx_score = sounds.score,
         };
     }
 

@@ -4,6 +4,7 @@ const rl = @import("raylib");
 const Ball = @import("ball.zig").Ball;
 const Paddle = @import("paddle.zig").Paddle;
 const Player = @import("player.zig").Player;
+const SFX = @import("audio.zig").SFX;
 
 const PADDLE_PADDING = 10;
 const PADDLE_WIDTH = 10;
@@ -43,7 +44,7 @@ pub const Game = struct {
 
     const Self = @This();
 
-    pub fn init(width: f32, height: f32, max_score: f32, game_mode: GameMode) !Self {
+    pub fn init(width: f32, height: f32, max_score: f32, game_mode: GameMode, sounds: SFX) !Self {
         var player_one_mode: GamePlayMode = undefined;
         var player_two_mode: GamePlayMode = undefined;
 
@@ -92,7 +93,7 @@ pub const Game = struct {
         const player_one = Player.init(player_one_mode, player_one_paddle);
         const player_two = Player.init(player_two_mode, player_two_paddle);
 
-        const ball = Ball.init(width / 2, height / 2, 10, BALL_SPEED, width, height) catch unreachable;
+        const ball = Ball.init(width / 2, height / 2, 10, BALL_SPEED, width, height, sounds) catch unreachable;
 
         return Self{
             .mode = game_mode,
