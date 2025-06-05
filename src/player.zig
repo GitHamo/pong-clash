@@ -26,4 +26,8 @@ pub const Player = struct {
             paddle.draw();
         }
     }
+
+    pub fn reset(self: *Self) void {
+        self.score = 0;
+    }
 };
