@@ -9,7 +9,9 @@ pub const Button = struct {
     normal_color: rl.Color,
     hover_color: rl.Color,
     press_color: rl.Color,
+    focus_color: rl.Color,
     text_color: rl.Color,
+    is_focused: bool = false,
 
     pub fn init(
         position_x: f32,
@@ -20,17 +22,23 @@ pub const Button = struct {
         label_color: rl.Color,
         font_size: i32,
         color: rl.Color,
-        hover_color: rl.Color,
-        press_color: rl.Color,
+        hover_color: ?rl.Color,
+        press_color: ?rl.Color,
+        focus_color: ?rl.Color,
     ) Button {
+        const final_hover_color = hover_color orelse color;
+        const final_press_color = press_color orelse final_hover_color;
+        const final_focus_color = focus_color orelse final_press_color;
+
         return .{
             .state = .normal,
             .rect = rl.Rectangle{ .x = position_x, .y = position_y, .width = width, .height = height },
             .text = label,
             .font_size = font_size,
             .normal_color = color,
-            .hover_color = hover_color,
-            .press_color = press_color,
+            .hover_color = final_hover_color,
+            .press_color = final_press_color,
+            .focus_color = final_focus_color,
             .text_color = label_color,
         };
     }
@@ -61,11 +69,16 @@ pub const Button = struct {
     }
 
     pub fn draw(self: *Button) void {
-        const color = switch (self.state) {
+        var color = switch (self.state) {
             .normal => self.normal_color,
             .hovered => self.hover_color,
             .pressed => self.press_color,
         };
+
+        if (self.is_focused) {
+            color = self.focus_color;
+        }
+
         // Draw button background
         rl.drawRectangleRec(self.rect, color);
         rl.drawRectangleLinesEx(self.rect, 2, rl.Color.white);
@@ -75,6 +88,10 @@ pub const Button = struct {
         const text_y = self.rect.y + (self.rect.height - @as(f32, @floatFromInt(self.font_size))) / 2;
         // Draw text
         rl.drawText(@ptrCast(self.text), @intFromFloat(text_x), @intFromFloat(text_y), self.font_size, self.text_color);
+    }
+
+    pub fn toggleFocus(self: *Button) void {
+        self.is_focused = !self.is_focused;
     }
 };
 
