@@ -1,27 +1,27 @@
-pub const Screen = enum {
-    start,
-    playing,
-};
+const GameConfig = @import("types.zig").GameConfig;
+const GameRoute = @import("types.zig").GameRoute;
 
 pub const StateManager = struct {
-    current: Screen,
+    route: GameRoute = .start,
+    config: GameConfig = .{},
 
     pub fn init() StateManager {
-        return StateManager{
-            .current = .playing,
-        };
+        return .{};
     }
 
-    pub fn set(self: *StateManager, state: Screen) void {
-        self.current = state;
+    pub fn setRoute(self: *StateManager, route: GameRoute) void {
+        self.route = route;
     }
 
-    pub fn get(self: StateManager) Screen {
-        return self.current;
+    pub fn getRoute(self: StateManager) GameRoute {
+        return self.route;
     }
 
-    //// todo: remove if not used
-    pub fn shouldExit(self: *const StateManager) bool {
-        return self.current == .exit;
+    pub fn setConfig(self: *StateManager, config: GameConfig) void {
+        self.config = config;
+    }
+
+    pub fn getConfig(self: StateManager) GameConfig {
+        return self.config;
     }
 };
