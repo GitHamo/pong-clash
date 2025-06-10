@@ -2,7 +2,7 @@ const GameConfig = @import("types.zig").GameConfig;
 const GameRoute = @import("types.zig").GameRoute;
 
 pub const StateManager = struct {
-    route: GameRoute = .start,
+    route: GameRoute = .game,
     config: GameConfig = .{},
 
     pub fn init() StateManager {

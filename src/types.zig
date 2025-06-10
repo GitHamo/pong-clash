@@ -1,6 +1,6 @@
 pub const GameRoute = enum {
     start,
-    playing,
+    game,
     exit,
 };
 
@@ -19,7 +19,7 @@ pub const GameLevel = enum {
     hard,
 };
 
-pub const PlayerMode = enum {
+pub const PaddleMode = enum {
     auto_response,
     auto_reaction,
     manual,
@@ -34,10 +34,4 @@ pub const GameConfig = struct {
     mode: GameMode = .none,
     level: GameLevel = .medium,
     win: GameOver = .seconds,
-};
-
-pub const RoundConfig = struct {
-    mode: GameMode,
-    level: GameLevel,
-    win: GameOver,
 };
