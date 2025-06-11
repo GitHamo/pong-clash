@@ -19,12 +19,6 @@ pub const GameLevel = enum {
     hard,
 };
 
-pub const PaddleMode = enum {
-    auto_response,
-    auto_reaction,
-    manual,
-};
-
 pub const GameOver = enum {
     seconds,
     points,

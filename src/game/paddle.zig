@@ -1,10 +1,15 @@
 const std = @import("std");
 const rl = @import("raylib");
 const Ball = @import("ball.zig").Ball;
-const PaddleMode = @import("game.zig").PaddleMode;
 
 const RESPONSE_FACTOR = 0.9; // less is easier
 const REACTION_FACTOR = 0.05; // less is harder
+
+const PaddleMode = enum {
+    auto_response,
+    auto_reaction,
+    manual,
+};
 
 pub const Paddle = struct {
     x: f32,

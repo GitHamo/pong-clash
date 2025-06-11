@@ -4,8 +4,7 @@ const rl = @import("raylib");
 const sfx = @import("../audio.zig").SFX;
 const Ball = @import("ball.zig").Ball;
 const Paddle = @import("paddle.zig").Paddle;
-const Game = @import("game.zig");
-const ArenaConfig = Game.ArenaConfig;
+const ArenaConfig = @import("../types.zig").ArenaConfig;
 const GameRound = @import("round.zig").RoundManager;
 const GameSpawner = @import("spawner.zig");
 
