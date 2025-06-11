@@ -35,3 +35,14 @@ pub const GameConfig = struct {
     level: GameLevel = .medium,
     win: GameOver = .seconds,
 };
+
+pub const ArenaConfig = struct {
+    x: f32,
+    y: f32,
+    w: f32,
+    h: f32,
+    ball_radius: f32 = 10,
+    paddle_width: f32 = 10,
+    paddle_margin: f32 = 10,
+    game: GameConfig = .{},
+};

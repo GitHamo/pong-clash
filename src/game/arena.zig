@@ -5,28 +5,15 @@ const sfx = @import("../audio.zig").SFX;
 const Ball = @import("ball.zig").Ball;
 const Paddle = @import("paddle.zig").Paddle;
 const Game = @import("game.zig");
+const ArenaConfig = Game.ArenaConfig;
+const GameConfig = Game.GameConfig;
 const GameMode = Game.GameMode;
 const GameLevel = Game.GameLevel;
 const GameOver = Game.GameOver;
 const PaddleMode = Game.PaddleMode;
 const Gameplay = @import("play.zig").Gameplay;
 const GameRound = @import("round.zig").RoundManager;
-
-pub const ArenaConfig = struct {
-    x: f32,
-    y: f32,
-    w: f32,
-    h: f32,
-    ball_radius: f32,
-    ball_speed: f32,
-    paddle_width: f32,
-    paddle_height: f32,
-    paddle_margin: f32,
-    paddle_speed: f32,
-    game_mode: GameMode,
-    game_level: GameLevel,
-    game_over: GameOver,
-};
+const GameSpawner = @import("spawner.zig");
 
 pub const Arena = struct {
     allocator: Allocator,
@@ -37,21 +24,10 @@ pub const Arena = struct {
 
     const Self = @This();
 
-    pub fn init(allocator: Allocator, config: ArenaConfig, round: GameRound, sounds: sfx) Self {
-        const screen_width = config.w;
-        const screen_height = config.h;
-        const ball_x = screen_width / 2;
-        const ball_y = screen_height / 2;
-        const ball = Ball.init(
-            ball_x,
-            ball_y,
-            config.ball_radius,
-            config.ball_speed,
-            screen_width,
-            screen_height,
-            sounds,
-        );
-        const paddles = create_paddles(allocator, config) catch unreachable;
+    pub fn init(allocator: Allocator, config: ArenaConfig, sounds: sfx) Self {
+        const round = GameSpawner.createRound();
+        const ball = GameSpawner.createBall(config, sounds);
+        const paddles = GameSpawner.createPaddles(allocator, config) catch unreachable;
 
         return Self{
             .allocator = allocator,
@@ -72,13 +48,7 @@ pub const Arena = struct {
         switch (self.round.state) {
             .ended => {
                 self.reset();
-                self.round.reset(
-                    Game.GameConfig{
-                        .mode = self.config.game_mode,
-                        .level = self.config.game_level,
-                        .win = self.config.game_over,
-                    },
-                );
+                self.round.reset();
                 // TODO: Play game over sound
                 // TODO: Show game over screen
             },
@@ -86,7 +56,7 @@ pub const Arena = struct {
         }
 
         for (self.paddles, 0..) |*paddle, i| {
-            const mode: PaddleMode = switch (self.config.game_mode) {
+            const mode: PaddleMode = switch (self.config.game.mode) {
                 .none => unreachable,
                 .practice, .two_players => .manual,
                 .one_player => if (i == 0) .manual else .auto_response,
@@ -113,12 +83,13 @@ pub const Arena = struct {
     }
 
     pub fn reset(self: *Self) void {
+        self.round.reset();
         self.ball.reset();
     }
 };
 
 fn create_paddles(allocator: Allocator, config: ArenaConfig) ![]Paddle {
-    const paddle_count: u8 = switch (config.game_mode) {
+    const paddle_count: u8 = switch (config.game.mode) {
         .none => 0,
         .practice, .cpu => 1,
         .one_player, .two_players, .cpu_vs_cpu => 2,
@@ -126,7 +97,7 @@ fn create_paddles(allocator: Allocator, config: ArenaConfig) ![]Paddle {
 
     var paddles = try allocator.alloc(Paddle, paddle_count);
 
-    switch (config.game_mode) {
+    switch (config.game.mode) {
         .none => {},
         .practice, .cpu => {
             paddles[0] = create_paddle(config, config.paddle_margin);
