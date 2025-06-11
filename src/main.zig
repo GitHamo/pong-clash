@@ -28,7 +28,14 @@ pub fn main() !void {
     };
     defer game.deinit();
 
+    var is_muted = false;
+
     while (!rl.windowShouldClose()) {
+        if (rl.isKeyPressed(.m)) {
+            is_muted = !is_muted;
+            rl.setMasterVolume(if (is_muted) 0.0 else 1.0);
+        }
+
         rl.beginDrawing();
         defer rl.endDrawing();
 
