@@ -6,12 +6,6 @@ const Ball = @import("ball.zig").Ball;
 const Paddle = @import("paddle.zig").Paddle;
 const Game = @import("game.zig");
 const ArenaConfig = Game.ArenaConfig;
-const GameConfig = Game.GameConfig;
-const GameMode = Game.GameMode;
-const GameLevel = Game.GameLevel;
-const GameOver = Game.GameOver;
-const PaddleMode = Game.PaddleMode;
-const Gameplay = @import("play.zig").Gameplay;
 const GameRound = @import("round.zig").RoundManager;
 const GameSpawner = @import("spawner.zig");
 
@@ -55,16 +49,7 @@ pub const Arena = struct {
             else => {},
         }
 
-        for (self.paddles, 0..) |*paddle, i| {
-            const mode: PaddleMode = switch (self.config.game.mode) {
-                .none => unreachable,
-                .practice, .two_players => .manual,
-                .one_player => if (i == 0) .manual else .auto_response,
-                .cpu_vs_cpu => if (i == 0) .auto_reaction else .auto_response,
-                .cpu => .auto_response,
-            };
-            paddle.update(mode, &self.ball);
-        }
+        self.update_paddles();
 
         const score = self.ball.update(&self.paddles);
 
@@ -85,6 +70,50 @@ pub const Arena = struct {
     pub fn reset(self: *Self) void {
         self.round.reset();
         self.ball.reset();
+    }
+
+    fn update_paddles(self: *Self) void {
+        const screen_height = self.config.h;
+
+        switch (self.config.game.mode) {
+            .practice, .one_player => {
+                if(self.paddles.len > 0) {
+                    const paddle_left = &self.paddles[0];
+                    if (rl.isKeyDown(.w) or rl.isKeyDown(.up)) {
+                        paddle_left.move(-1, screen_height);
+                    }
+                    if (rl.isKeyDown(.s) or rl.isKeyDown(.down)) {
+                        paddle_left.move(1, screen_height);
+                    }
+                }
+            },
+            .cpu, .cpu_vs_cpu => {
+                if(self.paddles.len > 0) {
+                    self.paddles[0].update(.auto_response, &self.ball);
+                }
+            },
+            else => {},
+        }
+
+        switch (self.config.game.mode) {
+            .two_players => {
+                if(self.paddles.len > 1) {
+                    const paddle_right = &self.paddles[1];
+                    if (rl.isKeyDown(.up)) {
+                        paddle_right.move(-1, screen_height);
+                    }
+                    if (rl.isKeyDown(.down)) {
+                        paddle_right.move(1, screen_height);
+                    }
+                }
+            },
+            .one_player, .cpu_vs_cpu => {
+                if(self.paddles.len > 1) {
+                    self.paddles[1].update(.auto_reaction, &self.ball);
+                }
+            },
+            else => {},
+        }
     }
 };
 

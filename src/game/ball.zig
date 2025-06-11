@@ -1,4 +1,3 @@
-const std = @import("std");
 const rl = @import("raylib");
 const sfx = @import("../audio.zig").SFX;
 const collision = @import("collision.zig");
