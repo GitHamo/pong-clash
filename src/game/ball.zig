@@ -1,6 +1,7 @@
 const std = @import("std");
 const rl = @import("raylib");
 const sfx = @import("../audio.zig").SFX;
+const collision = @import("collision.zig");
 const Paddle = @import("paddle.zig").Paddle;
 
 pub const Ball = struct {
@@ -40,9 +41,35 @@ pub const Ball = struct {
         };
     }
 
-    pub fn update(self: *Self) void {
+    pub fn update(self: *Self, paddles: *const []Paddle) ?u2 {
         self.x += self.vx;
         self.y += self.vy;
+
+        if (collision.check_y_top(self) or collision.check_y_bottom(self)) {
+            self.bounce_y();
+        }
+
+        if (collision.check_ps(self, paddles)) {
+            self.bounce_x();
+        }
+
+        if (collision.check_x_left(self)) {
+            if (paddles.len > 0) {
+                self.reset();
+                return 1; // player 2 scores
+            }
+            self.bounce_x();
+        }
+
+        if (collision.check_x_right(self)) {
+            if (paddles.len > 1) {
+                self.reset();
+                return 0; // player 1 scores
+            }
+            self.bounce_x();
+        }
+
+        return null;
     }
 
     pub fn draw(self: *Self) void {
@@ -65,17 +92,13 @@ pub const Ball = struct {
         rl.playSound(self.fx_score);
     }
 
-    pub fn bounce_y(self: *Self) void {
+    fn bounce_y(self: *Self) void {
         self.vy = -self.vy;
         rl.playSound(self.fx_hit);
     }
 
-    pub fn bounce_x(self: *Self) void {
+    fn bounce_x(self: *Self) void {
         self.vx = -self.vx;
         rl.playSound(self.fx_hit);
-    }
-
-    fn score(self: *Self) void {
-        self.reset();
     }
 };

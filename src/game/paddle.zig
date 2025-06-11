@@ -25,7 +25,7 @@ pub const Paddle = struct {
         };
     }
 
-    pub fn update(self: *Self, mode: PaddleMode, ball: Ball) void {
+    pub fn update(self: *Self, mode: PaddleMode, ball: *const Ball) void {
         switch (mode) {
             .auto_response => self.get_auto_response(ball.y, ball.screen_h, RESPONSE_FACTOR),
             .auto_reaction => self.get_auto_reaction(ball.x, ball.y, ball.screen_w, ball.screen_h, REACTION_FACTOR),
