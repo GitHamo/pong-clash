@@ -19,7 +19,7 @@ pub fn build(b: *std.Build) void {
     });
 
     const uic_mod = b.createModule(.{
-        .root_source_file = b.path("src/ui_components.zig"),
+        .root_source_file = b.path("src/ui/components.zig"),
         .target = target,
         .optimize = optimize,
     });
