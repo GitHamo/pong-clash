@@ -84,18 +84,17 @@ pub const Button = struct {
             color = self.focus_color;
         }
 
-        // Draw button background
         rl.drawRectangleRec(self.rect, color);
         rl.drawRectangleLinesEx(self.rect, 2, rl.Color.white);
-        // Calculate text position to center it
+
         const text_width = rl.measureText(@ptrCast(self.text), self.font_size);
         const text_x = self.rect.x + (self.rect.width - @as(f32, @floatFromInt(text_width))) / 2;
         const text_y = self.rect.y + (self.rect.height - @as(f32, @floatFromInt(self.font_size))) / 2;
-        // Draw text
+
         rl.drawText(@ptrCast(self.text), @intFromFloat(text_x), @intFromFloat(text_y), self.font_size, self.text_color);
     }
 
-    pub fn toggleFocus(self: *Button) void {
-        self.is_focused = !self.is_focused;
+    pub fn setFocus(self: *Button, is_focused: bool) void {
+        self.is_focused = is_focused;
     }
 };

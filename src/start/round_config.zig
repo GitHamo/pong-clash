@@ -53,18 +53,21 @@ pub const GameRoundConfigButtons = struct {
     }
 
     pub fn update(self: *Self) *const GameRoundConfig {
+        self.preselectFocus();
         for (self.left.items, 0..) |*button, i| {
             if (button.update()) {
+                self.resetFocus(&self.left);
                 self.selected.win = switch (i) {
                     0 => .seconds,
                     1 => .points,
                     else => unreachable,
                 };
-                button.toggleFocus();
+                button.setFocus(true);
             }
         }
         for (self.middle.items, 0..) |*button, i| {
             if (button.update()) {
+                self.resetFocus(&self.middle);
                 self.selected.mode = switch (i) {
                     0 => .none,
                     1 => .practice,
@@ -74,22 +77,65 @@ pub const GameRoundConfigButtons = struct {
                     5 => .cpu,
                     else => unreachable,
                 };
-                button.toggleFocus();
+                button.setFocus(true);
             }
         }
         for (self.right.items, 0..) |*button, i| {
             if (button.update()) {
+                self.resetFocus(&self.right);
                 self.selected.level = switch (i) {
                     0 => .easy,
                     1 => .medium,
                     2 => .hard,
                     else => unreachable,
                 };
-                button.toggleFocus();
+                button.setFocus(true);
             }
         }
 
         return &self.selected;
+    }
+
+    fn resetFocus(_: *Self, buttons_group: *std.ArrayList(Button)) void {
+        for (buttons_group.items) |*other_button| {
+            other_button.setFocus(false);
+        }
+    }
+
+    fn preselectFocus(self: *Self) void {
+        const initial_config = self.selected;
+
+        for (self.left.items, 0..) |*button, i| {
+            const should_select = switch (i) {
+                0 => initial_config.win == .seconds,
+                1 => initial_config.win == .points,
+                else => false,
+            };
+            button.setFocus(should_select);
+        }
+
+        for (self.middle.items, 0..) |*button, i| {
+            const should_select = switch (i) {
+                0 => initial_config.mode == .none,
+                1 => initial_config.mode == .practice,
+                2 => initial_config.mode == .one_player,
+                3 => initial_config.mode == .two_players,
+                4 => initial_config.mode == .cpu_vs_cpu,
+                5 => initial_config.mode == .cpu,
+                else => false,
+            };
+            button.setFocus(should_select);
+        }
+
+        for (self.right.items, 0..) |*button, i| {
+            const should_select = switch (i) {
+                0 => initial_config.level == .easy,
+                1 => initial_config.level == .medium,
+                2 => initial_config.level == .hard,
+                else => false,
+            };
+            button.setFocus(should_select);
+        }
     }
 };
 
