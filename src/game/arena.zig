@@ -7,6 +7,7 @@ const Paddle = @import("paddle.zig").Paddle;
 const ArenaConfig = @import("../types.zig").ArenaConfig;
 const GameRound = @import("round.zig").RoundManager;
 const GameSpawner = @import("spawner.zig");
+const Line = @import("ui_components").Line;
 
 pub const Arena = struct {
     allocator: Allocator,
@@ -14,6 +15,7 @@ pub const Arena = struct {
     round: GameRound,
     ball: Ball,
     paddles: []Paddle,
+    separator: Line,
 
     const Self = @This();
 
@@ -21,6 +23,7 @@ pub const Arena = struct {
         const round = GameSpawner.createRound();
         const ball = GameSpawner.createBall(config, sounds);
         const paddles = GameSpawner.createPaddles(allocator, config) catch unreachable;
+        const separator = create_arena_separator(config);
 
         return Self{
             .allocator = allocator,
@@ -28,6 +31,7 @@ pub const Arena = struct {
             .round = round,
             .ball = ball,
             .paddles = paddles,
+            .separator = separator,
         };
     }
 
@@ -61,6 +65,8 @@ pub const Arena = struct {
     pub fn draw(self: *Self) void {
         self.ball.draw();
 
+        self.separator.draw();
+
         for (self.paddles) |*paddle| {
             paddle.draw();
         }
@@ -76,7 +82,7 @@ pub const Arena = struct {
 
         switch (self.config.game.mode) {
             .practice, .one_player => {
-                if(self.paddles.len > 0) {
+                if (self.paddles.len > 0) {
                     const paddle_left = &self.paddles[0];
                     if (rl.isKeyDown(.w) or rl.isKeyDown(.up)) {
                         paddle_left.move(-1, screen_height);
@@ -87,7 +93,7 @@ pub const Arena = struct {
                 }
             },
             .cpu, .cpu_vs_cpu => {
-                if(self.paddles.len > 0) {
+                if (self.paddles.len > 0) {
                     self.paddles[0].update(.auto_response, &self.ball);
                 }
             },
@@ -96,7 +102,7 @@ pub const Arena = struct {
 
         switch (self.config.game.mode) {
             .two_players => {
-                if(self.paddles.len > 1) {
+                if (self.paddles.len > 1) {
                     const paddle_right = &self.paddles[1];
                     if (rl.isKeyDown(.up)) {
                         paddle_right.move(-1, screen_height);
@@ -107,7 +113,7 @@ pub const Arena = struct {
                 }
             },
             .one_player, .cpu_vs_cpu => {
-                if(self.paddles.len > 1) {
+                if (self.paddles.len > 1) {
                     self.paddles[1].update(.auto_reaction, &self.ball);
                 }
             },
@@ -146,5 +152,23 @@ fn create_paddle(config: ArenaConfig, x: f32) Paddle {
         config.paddle_width,
         config.paddle_height,
         config.paddle_speed,
+    );
+}
+
+fn create_arena_separator(config: ArenaConfig) Line {
+    const separator_x = config.w / 2;
+    const separator_y_start = 0;
+    const separator_y_end = config.h;
+    const separator_width = 20;
+    const separator_start = @Vector(2, f32){ separator_x, separator_y_start };
+    const separator_end = @Vector(2, f32){ separator_x, separator_y_end };
+
+    return Line.init(
+        separator_start,
+        separator_end,
+        separator_width,
+        .dashed,
+        .vertical,
+        .white,
     );
 }
