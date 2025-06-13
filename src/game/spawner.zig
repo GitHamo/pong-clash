@@ -12,7 +12,7 @@ pub fn createRound() GameRound {
     return GameRound.init(ROUND_MAX_POINTS);
 }
 
-pub fn createBall(config: ArenaConfig, sounds: sfx) Ball {
+pub fn createBall(config: *const ArenaConfig, sounds: sfx) Ball {
     const screen_width = config.w;
     const screen_height = config.h;
     const ball_x = screen_width / 2;
@@ -28,7 +28,7 @@ pub fn createBall(config: ArenaConfig, sounds: sfx) Ball {
     );
 }
 
-pub fn createPaddles(allocator: std.mem.Allocator, config: ArenaConfig) ![]Paddle {
+pub fn createPaddles(allocator: std.mem.Allocator, config: *const ArenaConfig) ![]Paddle {
     const paddle_count: u8 = switch (config.game.mode) {
         .none => 0,
         .practice, .cpu => 1,
@@ -51,7 +51,7 @@ pub fn createPaddles(allocator: std.mem.Allocator, config: ArenaConfig) ![]Paddl
     return paddles;
 }
 
-fn create_paddle(config: ArenaConfig, x: f32) Paddle {
+fn create_paddle(config: *const ArenaConfig, x: f32) Paddle {
     return Paddle.init(
         x,
         config.h / 2,

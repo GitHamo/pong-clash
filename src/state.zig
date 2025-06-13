@@ -2,7 +2,7 @@ const GameConfig = @import("types.zig").GameConfig;
 const GameRoute = @import("types.zig").GameRoute;
 
 pub const StateManager = struct {
-    route: GameRoute = .game,
+    route: GameRoute = .start,
     config: GameConfig = .{},
 
     pub fn init() StateManager {
@@ -13,7 +13,7 @@ pub const StateManager = struct {
         self.route = route;
     }
 
-    pub fn getRoute(self: StateManager) GameRoute {
+    pub fn getRoute(self: *StateManager) GameRoute {
         return self.route;
     }
 
@@ -21,7 +21,7 @@ pub const StateManager = struct {
         self.config = config;
     }
 
-    pub fn getConfig(self: StateManager) GameConfig {
+    pub fn getConfig(self: *StateManager) GameConfig {
         return self.config;
     }
 };

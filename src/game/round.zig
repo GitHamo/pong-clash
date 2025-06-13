@@ -10,7 +10,7 @@ const Player = struct {
     }
 };
 
-const Scores = struct {
+pub const Scores = struct {
     player1: f32 = 0,
     player2: f32 = 0,
     player3: f32 = 0,

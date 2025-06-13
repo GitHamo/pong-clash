@@ -11,7 +11,7 @@ const Line = @import("ui_components").Line;
 
 pub const Arena = struct {
     allocator: Allocator,
-    config: ArenaConfig,
+    config: *const ArenaConfig,
     round: GameRound,
     ball: Ball,
     paddles: []Paddle,
@@ -19,7 +19,7 @@ pub const Arena = struct {
 
     const Self = @This();
 
-    pub fn init(allocator: Allocator, config: ArenaConfig, sounds: sfx) Self {
+    pub fn init(allocator: Allocator, config: *const ArenaConfig, sounds: sfx) Self {
         const round = GameSpawner.createRound();
         const ball = GameSpawner.createBall(config, sounds);
         const paddles = GameSpawner.createPaddles(allocator, config) catch unreachable;
