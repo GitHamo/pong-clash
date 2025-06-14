@@ -35,6 +35,8 @@ pub fn main() !void {
             is_muted = !is_muted;
         }
 
+        rl.setMasterVolume(if (is_muted) 0.0 else 1.0);
+
         rl.beginDrawing();
         defer rl.endDrawing();
 
